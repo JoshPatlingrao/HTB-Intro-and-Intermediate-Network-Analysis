@@ -97,3 +97,117 @@ Q1. Inspect the ICMP_smurf.pcapng file, part of this module's resources, and ent
     - Endpoint resource has been overloaded
   - The attacker IP is: 192.168.10.5
 - Answer is: 1
+
+### 2.7 IP Time-to-Live Attack
+#### Notes
+
+### 2.8 TCP Handshake Abnormalities
+#### Notes
+#### Walkthrough
+Q1. Inspect the nmap_syn_scan.pcapng file, part of this module's resources, and enter the total count of packets that have the TCP ACK flag set as your answer.
+- Open Wireshark, and open nmap_syn_scan capture file
+- Filter for: 
+  - tcp.flags.ack == 1
+    - This will return TCP packets that have the ACK flag
+- Bottom left should show:
+  - Packets: 848 : Displayed: 429
+- Answer is: 429
+
+### 2.9 TCP Connection Resets & Hijacking
+#### Notes
+#### Walkthrough
+Q1. Inspect the TCP-hijacking.pcap file, part of this module's resources, and enter the username that has been used through the telnet protocol as your answer.
+- Open Wireshark, and open TCP-hijacking capture file
+- Filter for: 
+  - telnet
+    - This will only return packets that used TelNet protocol
+- Inspect all 13 packets, right click and follow TCP stream. All should be outputting the same username used in the protocol
+- Answer is: administrator
+
+### 2.10 ICMP Tunneling
+#### Notes
+#### Walkthrough
+Q1. Enter the decoded value of the base64-encoded string that was mentioned in this section as your answer.
+- Command is found in lesson, but otherwise, open Wireshark, and open ICMP-tunneling capture file
+- Filter for: 
+  - icmp
+    - This will only return packets that used ICMP protocol. Since in this case attacker used ICMP tunneling to exfiltrate data.
+- Matching cipher text should be in packets no. 147 or 180
+- Open the HTB machine and run this command in the Linux terminal
+  - echo 'VGhpcyBpcyBhIHNlY3VyZSBrZXk6IEtleTEyMzQ1Njc4OQo=' | base64 -d
+- Answer is: This is a secure key: Key123456789
+
+### 2.11 HTTP/s Service Enumeration
+#### Notes
+#### Walkthrough
+Q1. Inspect the basic_fuzzing.pcapng file, part of this module's resources, and enter the total number of HTTP packets that are related to GET requests against port 80 as your answer.
+- Open Wireshark, and open basic_fuzzing capture file
+- Filter for: 
+  - http.request.method == GET && tcp.port == 80
+    - http.request.method == GET
+      - Will filter for HTTP packets that are related to GET
+    - tcp.port == 80
+      - Will ensure that it will only show HTTP traffic going to port 80
+- Bottom left should show:
+  - Packets: 2040 : Displayed: 204
+- Answer is: 204
+
+### 2.12 Strange HTTP Headers
+#### Notes
+#### Walkthrough
+Q1. Inspect the CRLF_and_host_header_manipulation.pcapng file, part of this module's resources, and enter the total number of HTTP packets with response code 400 as your answer.
+- Open Wireshark, and open CRLF_and_host_header_manipulation capture file
+- Filter for: 
+  - http.response.code == 400
+    - This will return HTTP packets with a response code of 400
+- Bottom left should show:
+  - Packets: 327 : Displayed: 7
+- Answer is: 7
+
+### 2.13 Cross-Site Scripting (XSS) & Code Injection Detection
+#### Notes
+#### Walkthrough
+Q1. Inspect the first packet of the XSS_Simple.pcapng file, part of this module's resources, and enter the cookie value that was exfiltrated as your answer.
+- Open Wireshark, and open respective capture file
+- Inspect the first log, right click and follow the HTTP stream
+- Answer is: mZjQ17NLXY8ZNBbJCS0O
+
+### 2.14 SSL Renegotiation Attacks
+#### Notes
+#### Walkthrough
+Q1. Inspect the SSL_renegotiation_edited.pcapng file, part of this module's resources, and enter the total count of "Client Hello" requests as your answer.
+- Open Wireshark, and open respective capture file
+- Filter for: 
+  - ssl.handshake.type == 1
+    - This will shown only the ‘Client Hello’ packets
+- Bottom left should show:
+  - Packets: 103 : Displayed: 16
+- Answer is: 16
+
+### 2.15 Peculiar DNS Traffic
+#### Notes
+#### Walkthrough
+Q1. Enter the decoded value of the triple base64-encoded string that was mentioned in this section as your answer. Answer format: HTB{___}
+- Command is found in lesson, but otherwise, open Wireshark, and open DNS-tunneling capture file
+- Filter for: 
+  - dns
+    - This will shown only the DNS protocol packets
+- Open packet 11, and copy and paste the TXT field value. This is in Answers tab.
+- Run this command in HTB Linux machine:
+  - echo 'VTBaU1EyVXhaSFprVjNocldETnNkbVJXT1cxaU0wb3pXVmhLYTFneU1XeFlNMUp2WVZoT1ptTklTbXhrU0ZJMVdETkNjMXBYUm5wYQpXREJMQ2c9PQo=' | base64 -d | base64 -d | base64 -d
+  - Attackers can and will double or triple encode, maybe even more.
+- Answer is: HTB{Would_you_forward_me_this_pretty_please}
+
+### 2.16 Strange Telnet & UDP Connections
+#### Notes
+#### Walkthrough
+Q1. Inspect the telnet_tunneling_ipv6.pcapng file, part of this module's resources, and enter the hidden flag as your answer. Answer format: HTB(___) (Replace all spaces with underscores)
+- Open Wireshark, and open respective capture file
+- Filter for: 
+  - telnet
+    - This will only show the TelNet traffic
+    - All TelNet traffic in this activity is using Ipv6 address
+- Flag is hidden on packet with length 115 and 29 bytes of data.
+  - Lesson exemplar is the length 130 and 44 bytes of data.
+  - Otherwise, the rest are smaller since there’s no real data in them.
+- Answer is: HTB(Ipv6_is_my_best_friend)
