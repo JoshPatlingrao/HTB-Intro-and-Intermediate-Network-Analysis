@@ -11,5 +11,4 @@ This page is a dedicated repository for my personalised notes for the module and
 ## 1.0 Introduction to Network Traffic Analysis
 
 ## 2.0 Intermediate Network Traffic Analysis
-### 2.1 Link Layer Attacks
-#### 2.1.1 ARP Spoofing
+### 2.1 ARP Spoofing
