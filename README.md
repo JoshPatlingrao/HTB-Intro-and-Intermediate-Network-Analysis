@@ -36,7 +36,36 @@ How ARP Works?
 4. Once it reaches PC-B, it replies with its IP address that's mapped to it's MAC address.
 5. PC-A will update its ARP cache.
 6. PC-A will beging communication to PC-B.
-  - If the network topology is changed or the IP address has expired, then PC-A will need to update its cache again.
+7. If the network topology is changed or the IP address has expired, then PC-A will need to update its cache again.
+
+ARP Poisoning
+- Three main components: the victim's computer, the router, and the attacker's computer.
+- Attacker dispatches counterfeit ARP message, both to router and victim.
+- Victim will receive an ARP saying that the gateway (router) IP address maps to the attackers MAC address.
+- Router will receive an ARP saying that the victim's IP address maps to the attackers MAC address.
+- If succesful, both ARP cache of victim and router are corrupted. All traffic is redirected to attacker's computer.
+  - If attacker also configures traffic forwarding, then attack escalates from a DoS to man-in-the-middle attack
+
+Defense
+- Static IP Entries: prevents easy rewrites and poisoning of ARP cache.
+  - Increases maintenance and management for the network
+- Switch & Router Port Security: implement network profile controls and other measures to ensure that only authorized devices can connect to specific ports on our network devices, effectively blocking foreign machines from ARP poisoning.
+  - Could be bypassed if attacker modifies their IP and MAC address to match an authorized device.
+ 
+Detecting
+- Focus on traffic anomalies coming from a specific host
+  - Constantly broadcasting ARP requests and replies to another host
+- Finetune the analysis. Focus on the REQs and REPs between the attacker's machine, the victim's machine, and the router
+  - arp.opcode == 1: For ARP Requests
+  - arp.opcode == 2: For ARP Replies
+- WireShark might raise - (duplicate use of <IP Address> detected!)
+  - Focus on this IP address. It will definitely be mapped to two different MAC addresses.
+  - Use 'arp.duplicate-address-detected' to filter for more duplicate IP warnings.
+
+Identify
+- Identify the original and legitimate IP to MAC address mapping
+  - Find attacker device, that altered its IP address through MAC spoofing
+  - It will have a different historical IP address.
 
 #### Walkthrough
 Q1. Inspect the ARP_Poison.pcapng file, part of this module's resources, and submit the total count of ARP requests (opcode 1) that originated from the address 08:00:27:53:0c:ba as your answer.
