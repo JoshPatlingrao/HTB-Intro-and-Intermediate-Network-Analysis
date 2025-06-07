@@ -13,8 +13,24 @@ This page is a dedicated repository for my personalised notes for the module and
 ## 1.0 Introduction to Network Traffic Analysis
 
 ## 2.0 Intermediate Network Traffic Analysis
-### 2.1 ARP Spoofing and Abnormality Detection
+#### Vocab
+- Indicator of Compromise (IoC)
 #### Notes
+- The attacks will focus on the link layer, IP layer, the transport, the network and application layers
+- Take note of patterns and trends within these attacks
+- Module covers anomaly detection techniques, log analysis, and investigation of IOCs
+  - Student must learn how to identify, report, and respond to threats more effectively and within a shorter time frame
+
+### 2.1 ARP Spoofing and Abnormality Detection
+#### Vocab
+- Address Resolution Protocol (ARP)
+#### Notes
+- ARP has a history of being exploited by attackers to launch man-in-the-middle, DOS attacks, various other attacks
+  - Which is why this is the first protocol you should always check.
+  - Many ARP attacks are on broadcast, makes it easily detectable for packet sniffers like TCPDump or WireShark
+ 
+How ARP Works?
+
 #### Walkthrough
 Q1. Inspect the ARP_Poison.pcapng file, part of this module's resources, and submit the total count of ARP requests (opcode 1) that originated from the address 08:00:27:53:0c:ba as your answer.
 - Open Wireshark, and open the respective capture file
