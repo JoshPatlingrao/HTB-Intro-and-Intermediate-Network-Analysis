@@ -7,7 +7,7 @@ This page is a dedicated repository for my personalised notes for the module and
 <div>
   <img src="https://img.shields.io/badge/Wireshark-4A9C2C?style=for-the-badge&logo=wireshark&logoColor=white" alt="Wireshark Badge" />
   <img src="https://img.shields.io/badge/tcpdump-4A9C2C?style=for-the-badge&logo=gnu&logoColor=white" alt="TCPDump Badge" />
-  <img src="https://img.shields.io/badge/Linux-4A9C2C?style=for-the-badge&logo=linux&logoColor=white" alt="Linux Badge" />
+  <img src="https://img.shields.io/badge/Linux-1bd2c6?style=for-the-badge&logo=linux&logoColor=white" alt="Linux Badge" />
 </div>
 
 ## 1.0 Introduction to Network Traffic Analysis
