@@ -18,11 +18,11 @@ Q1. Inspect the ARP_Poison.pcapng file, part of this module's resources, and sub
 - Open Wireshark, and open ARP_Poison capture file
 - Filter for:
   - arp.opcode == 1 && eth.src == 08:00:27:53:0c:ba
-	arp.opcode == 1
-•	For ARP REQ
-	eth.src == 08:00:27:53:0c:ba
-•	So all ARP traffic with MAC address source is this one
-•	Bottom left should show:
-o	Packets: 994 : Displayed: 507
-•	Answer is: 507
+    - arp.opcode == 1
+      - For ARP REQ
+    - eth.src == 08:00:27:53:0c:ba
+      - So all ARP traffic with MAC address source is this one
+- Bottom left should show:
+  - Packets: 994 : Displayed: 507
+- Answer is: 507
 
