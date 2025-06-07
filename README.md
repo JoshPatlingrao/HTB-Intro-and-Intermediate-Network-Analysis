@@ -30,6 +30,13 @@ This page is a dedicated repository for my personalised notes for the module and
   - Many ARP attacks are on broadcast, makes it easily detectable for packet sniffers like TCPDump or WireShark
  
 How ARP Works?
+1. PC-A wants to send data to PC-B. It needs to know its MAC address.
+2. PC-A will check its internal cache to see if it already knows PC-B's address.
+3. If it's now in ARP cache, then PC-A broadcasts ARP REQ to all machines in the subnet.
+4. Once it reaches PC-B, it replies with its IP address that's mapped to it's MAC address.
+5. PC-A will update its ARP cache.
+6. PC-A will beging communication to PC-B.
+  - If the network topology is changed or the IP address has expired, then PC-A will need to update its cache again.
 
 #### Walkthrough
 Q1. Inspect the ARP_Poison.pcapng file, part of this module's resources, and submit the total count of ARP requests (opcode 1) that originated from the address 08:00:27:53:0c:ba as your answer.
