@@ -24,6 +24,7 @@ This page is a dedicated repository for my personalised notes for the module and
 ### 2.1 ARP Spoofing and Abnormality Detection
 #### Vocab
 - Address Resolution Protocol (ARP)
+
 #### Notes
 - ARP has a history of being exploited by attackers to launch man-in-the-middle, DOS attacks, various other attacks
   - Which is why this is the first protocol you should always check.
@@ -81,7 +82,35 @@ Q1. Inspect the ARP_Poison.pcapng file, part of this module's resources, and sub
 - Answer is: 507
 
 ### 2.2 ARP Scanning and Denial of Service
+#### Vocab
+- Man in the Middle (MITM)
+
 #### Notes
+- Poisoning and spoofing is the core of most ARP-based DoS and MITM attacks.
+- Attackers can still use ARP-based attacks for recon.
+
+ARP Scanning Signs
+- Red Flags
+  - Broadcast ARP requests sent to sequential IP addresses
+    - 192.168.10.1 -> 192.168.10.2 -> 192.168.10.3 -> 192.168.10.4 -> ...
+    - A common feature of scanners such as Nmap 
+  - Broadcast ARP requests sent to non-existent hosts
+    - ARP packets to IP addresses not mapped to any device
+  - An unusual volume of ARP traffic originating from a malicious or compromised host
+    - Could come from multiple devices
+- If multiple active hosts replied, then the attacker's recon was succesful
+
+ARP Scanning for DoS
+- Attacker compiles all activbe hosts, and runs a DoS campaign to all these machines
+- Will try to contaminate an entire subnet and poison any ARP caches they could.
+  - Essentially ARP poisoning but for every device in a network
+    - May see multiple duplicate IPs mapped to multiple devices
+
+Defense
+- Trace & Identify: find the attacker's machine or compromised host and shut it down.
+- Containment: disconnect compromised devices or subnets at a switch or router level
+- ARP scanning is often unnoticed, but if deterred then potential data exfiltration could be stopped.
+
 #### Walkthrough
 Q1. Inspect the ARP_Poison.pcapng file, part of this module's resources, and submit the first MAC address that was linked with the IP 192.168.10.1 as your answer.
 - Open Wireshark, and open the respective capture file
@@ -92,7 +121,56 @@ Q1. Inspect the ARP_Poison.pcapng file, part of this module's resources, and sub
 - Answer is: 2c:30:33:e2:d5:c3
 
 ### 2.3 802.11 (WiFi) Denial of Service
+#### Vocab
+- Wireless Intrusion Detection System (WIDS)
+- Wireless Intrusion Prevention System (WIPS)
+- Wifi Protected Access (WPA)
+
 #### Notes
+- WiFi is another potential attack vector
+
+Capturing WiFi Traffic
+- To capture raw traffic, need WIDS/WIPS or a wireless interface equipped with monitor mode
+  - Similar to WireShark's promiscuous mode, it allows viewing of raw WiFiframes and other 'invisible' traffic
+ 
+Deauth Attacks
+- A commonplace link-layer precursor attack
+- Why?
+  - Capture the WPA handshake to perform an offline dictionary attack
+  - To cause general DoS conditions
+    - Similar effects to DoS where services can't be used due to constant deauthentication
+  - Enforce users to disconnect from the network, and potentially join their network to retrieve information
+- How?
+  - Attacker fabricates an 802.11 deauthentication frame, 'originating' it from a legitimate AP
+  - Some devices might disconnect, then attacker can do some sniffing while the devices redo the reauthentication and handshake process
+  - This attack works by spoofing/altering the MAC of the frame's sender.
+    - Victim's device can't tell the difference without additional controls like IEEE 802.11w (Management Frame Protection)
+  - Each deauth request has a reason code explaining the disconnection
+    -  Basic tools like aireplay-ng and mdk4 employ reason code 7
+
+Finding Deauth Attacks
+- In WireShark, to view traffic from our AP's BSSID (MAC), use 'wlan.bssid == xx:xx:xx:xx:xx:xx'
+  - Enter the MAC of the AP
+- Additional Filters
+  - wlan.fc.type == 00
+    - Management type frame
+  - wlan.fc.type_subtype == 12
+    - Subtype of management frame, for deauth
+  - wlan.fixed.reason_code == 7
+    - Reason code used by common tools such as aireplay-ng and mdk4
+    - Attacker could circumvent this by rotating the reason code, through incrementing or randomization
+- Multiple deauth frames is a sign of attack
+
+Defense
+- Enable IEEE 802.11w (Management Frame Protection) if possible
+- Utilize WPA3-SAE
+- Modify our WIDS/WIPS detection rules
+- Take note of excessive association requests coming from one (attacker) device
+  - Filter:
+    -  wlan.fc.type_subtype == 0
+    -  wlan.fc.type_subtype == 1
+    -  wlan.fc.type_subtype == 11
+
 #### Walkthrough
 Q1. Inspect the deauthandbadauth.cap file, part of this module's resources, and submit the total count of deauthentication frames as your answer.
 - Open Wireshark, and open the respective capture file
