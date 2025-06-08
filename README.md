@@ -188,7 +188,50 @@ Q1. Inspect the deauthandbadauth.cap file, part of this module's resources, and 
 - Answer is: 14592
 
 ### 2.4 Rogue Access Point & Evil-Twin Attacks
+#### Vocab
+- Robust Security Network (RSN)
+
 #### Notes
+- Very difficult to detect
+
+Rogue AP
+- Rogue APs primarily used to bypass perimeter controls (network controls and segmentation barriers)
+  - Directly connected to the network
+- Can infiltrate air-gapped networks.
+
+Evil Twin
+- Not connected to the network, most of the time.
+  - Are standalone APs, that might have a web server or something else to act as a MITM for wireless clients.
+     - Setup to harvest wireless or domain passwords among other pieces of information.
+     - Might also encompass a hostile portal attack
+
+Detection
+- Use tools like Airodump-ng
+- Attacker likely spoofed a legitimate router MAC address in the network
+  - Could host a hostile portal attack to extract credentials
+  - Could also do a deauth attack to force devices to connect to evil-twin
+- Filter:
+  - wlan.fc.type_subtype == 8
+    - Filter for beacon frames
+    - Allows us to tell legit and non-legit APs apart
+    - Look in the RSN field of a frame, contains info about supported ciphers
+      - This field will be missing in frames coming from attacker's APs
+    - Can still check other fields just in case
+      - Attacker could match the ciphers being offered by legit APs, giving the frames from attacker's AP an RSN field matching the legit frames
+      - In this case, look for more specific info such as vendor based info
+
+Finding Fallen Users
+- In case of open network style evil-twin attacks, most higher-level traffic in an unencrypted format are viewable.
+- Filter for the evil-twin using the spoofed MAC
+  - Since it's 'new' to the network then there should be traces of ARP requests
+    - Take note of MAC address and host name
+
+Finding Rogue APs
+- Check network device lists
+- In case of hotspot-based rogue AP, focus on wireless networks around the area
+  - There's likely an unrecognizable wireless network with a strong signal
+  - Might lack encryption
+
 #### Walkthrough
 Q1. Inspect the rogueap.cap file, part of this module's resources, and enter the MAC address of the Evil Twin attack's victim as your answer.
 - Open Wireshark, and open the respective capture file
