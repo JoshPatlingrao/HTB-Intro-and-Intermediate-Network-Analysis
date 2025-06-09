@@ -304,7 +304,57 @@ Q1. Inspect the nmap_frag_fw_bypass.pcapng file, part of this module's resources
 - Answer is: 66535
 
 ### 2.6 IP Source & Destination Spoofing Attacks
+#### Vocab
+- Distributed Denial of Service (DDoS)
+
 #### Notes
+- Unusual activity in IPv4 and IPv6 packets often involves the source and destination IP fields.
+  - Focus on the source IP:
+    - It should be from our local network. If it’s from outside, it may indicate packet crafting
+    - It should also be from our subnet. A different IP range suggests malicious activity from within the network
+   
+Why?
+- Decoy Scanning: Attackers change the source IP to match the target’s subnet to bypass firewalls and gather info about a host
+  - Attacker might change their source address to match another legitimate host
+  - They could also cloak their address with a decoy, but response of RST flags is still sent to them
+  - Look for:
+    - Initial fragmentation from a fake address
+    - Some TCP traffic from the legitimate source address
+  - Prevention:
+    - Mimic Destination Host: Set up IDS/IPS/Firewall to reassemble packets like the destination host would, to spot malicious activity clearly
+    - Monitor Connection Hijacking: Watch for cases where one host starts a connection, but another takes over. This is suspicious because attackers must reveal their true source IP to check if a port is open
+    - Set Rules: Define firewall or IDS/IPS rules to detect and block this unusual behavior
+
+- Random Source Attack DDoS: Attackers use random source IPs to flood a target’s port, overwhelming network or host resources
+  - Attackers send pings from many fake random source IPs to a non-existent host
+  - Similar to a SMURF attack but reversed: the target host pings back all fake sources and gets no reply, causing resource strain
+    - Resource exhaustion will increase exponentially with fragmentation
+  - The goal is to overload a specific service on a single port.
+  - Detect:
+    - Random hosts repeatedly target the same port
+    - The source ports increase predictably (incrementally) without randomization
+    - Packets have the same length, unlike normal traffic where packet lengths vary
+
+
+- LAND Attacks: Similar to above but the source and destination IPs are set to the same address, causing resource exhaustion or crashes on the target
+  - How?
+    - The attacker sends a large volume of packets to the target host
+    - By reusing the same ports, the attack overwhelms the target
+  - Occupying all base ports makes it hard for legitimate connections to reach the affected host
+
+- SMURF Attacks: Attackers send ICMP packets with the victim’s IP as the source, prompting many replies that overwhelm the victim
+  - A type of DDoS attack where random hosts overwhelm a victim host
+  - How?
+    - The attacker sends ICMP requests to many live hosts, faking the source IP as the victim’s IP
+    - The live hosts reply to the victim with ICMP responses
+    - This floods the victim, causing resource exhaustion
+  - Detection
+    - Excessive ICMP replies from one or more hosts to the victim
+    - Many different hosts pinging a single victim host
+  - Fragmentation can be incorporated to accelerate resource exhaustion
+
+- Initialization Vector Generation: In older wireless networks, attackers modify the source and destination IP addresses of captured packets and send it again to generate initialization vectors to build a decryption table for a statistical attack. Look for excessive repeated packets between hosts.
+
 #### Walkthrough
 Q1. Inspect the ICMP_smurf.pcapng file, part of this module's resources, and enter the total number of attacking hosts as your answer.
 - Open Wireshark, and open ICMP_smurf capture file
