@@ -248,7 +248,51 @@ Q1. Inspect the rogueap.cap file, part of this module's resources, and enter the
 - Answer is: 2c:6d:c1:af:eb:91
 
 ### 2.5 Fragmentation Attacks
+#### Vocab
+- Maximum Transmission Unit (MTU)
+
 #### Notes
+- IP layer helps move data packets from one device to another
+  - This layer doesn’t check if packets are lost, dropped, or tampered with
+  - Handled by higher layers - Transport or Application
+- Each packet has a source and destination IP address in its header
+
+Key Packet Fields
+- Length: Shows the length of the IP header
+- Total Length: Shows the length of the entire packet, including relevant data
+- Fragment Offset: Has instructions to help reassemble large packets that are split into smaller pieces
+- Source and Destination IP Addresses: Identify the sender and receiver of the packet.
+
+Commonly Abused Fields
+- Attackers may create or alter packets to disrupt communication
+- They might modify packets to bypass IDS
+- Study and understand how packet fields can be modified and abused
+
+Abuse of Fragmentation
+- How does Fragmentation work?
+  - Large packets are split into smaller pieces for easier transfer
+  - MTU sets the size for these pieces
+  - The last packet is often smaller
+  - This field helps the receiving device reassemble packets in the correct order.
+- Why?
+  - IPS/IDS Evasion: Attackers split malicious packets to bypass detection systems that don’t reassemble packets
+    - Done through tools such as nmap scans
+    - Without reassembly, the IDS/IPS can't detect that these packet fragments are part of a malicious software or indicator of data exfiltration
+  - Firewall Evasion: Fragmented packets can slip past firewalls if they don’t reassemble before checking
+  - Resource Exhaustion: Attackers use very small MTU sizes to overwhelm detection systems, causing them to fail due to resource limits
+    - These sizes range from 10, 20 bytes and so on
+  - DoS: Attackers send oversized packets to crash older systems when reassembled
+    -  Packets over 65,535 bytes
+- Defense
+  - Delayed Reassembly: Firewalls, IDS, or IPS should wait for all packet fragments, reassemble them, and inspect the full packet to catch malicious activity
+- Detection
+  - Several ICMP requests going to one host from another
+    - The start of recon, using tools such as nmap scan
+  - Attacker can define MTU size
+    - Large volumes of fragmentation from one host to another could be an indicator of attack
+    - More obvious is that it sends the fragments from various ports into a single port on target device
+      - Destination ports will respond with RST packet to all those ports from attacker and eventually exhaust its resources, a DoS
+
 #### Walkthrough
 Q1. Inspect the nmap_frag_fw_bypass.pcapng file, part of this module's resources, and enter the total count of packets that have the TCP RST flag set as your answer.
 - Open Wireshark, and open nmap_frag_fw_bypass capture file
