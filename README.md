@@ -447,6 +447,39 @@ Q1. Inspect the nmap_syn_scan.pcapng file, part of this module's resources, and 
 
 ### 2.9 TCP Connection Resets & Hijacking
 #### Notes
+- An attacker might try to disrupt your network by using a TCP RST Packet Injection attack (also known as TCP connection termination)
+
+TCP Connection Reset
+How?
+- Attacker spoofs the source IP address to make it look like it’s coming from a real machine on your network
+- They send a TCP packet with the RST flag, which forces the connection to close
+- They target a specific port that is already in use on the victim machine.
+- Many RST packets directed to a single port
+
+Detect
+- Check the MAC address of the device sending the RST packets
+- If the IP is supposed to match MAC , but a different MAC is sending the RST packets, that’s suspicious.
+  - Attackers might also spoof the MAC address to avoid detection
+    - Take note of retransmissions or other network issues, similar to ARP poisoning attacks
+
+TCP Hijacking
+How?
+- Advanced attacker might use TCP connection hijacking to take over an active connection between two devices
+- Attacker monitors the target connection to learn how it works
+- They perform sequence number prediction to insert their own packets in the correct order
+  - Might use AI for this instead to make it easier
+- While injecting packets, they spoof the source IP address to make it look like they are the real device
+
+Control
+- Attacker must block or delay ACK packets from reaching the real machine.
+  - Attackers employ other techniques such as ARP poisoning to block or redirect traffic
+- This prevents the real machine from correcting the connection, allowing the attacker to stay in control
+
+Detect
+- Out-of-order packets
+- Unexpected IP/MAC combinations
+- Interrupted or dropped ACK packets
+
 #### Walkthrough
 Q1. Inspect the TCP-hijacking.pcap file, part of this module's resources, and enter the username that has been used through the telnet protocol as your answer.
 - Open Wireshark, and open TCP-hijacking capture file
