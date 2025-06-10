@@ -540,8 +540,54 @@ Q1. Enter the decoded value of the base64-encoded string that was mentioned in t
   - echo 'VGhpcyBpcyBhIHNlY3VyZSBrZXk6IEtleTEyMzQ1Njc4OQo=' | base64 -d
 - Answer is: This is a secure key: Key123456789
 
-### 2.11 HTTP/s Service Enumeration
+### 2.11 HTTP/S Service Enumeration
+#### Vocab
+- Web Application Firewall (WAF)
+- Insecure Direct Object Reference (IDOR)
+
 #### Notes
+- Unusual or excessive HTTP/HTTPS traffic to your web servers can be a sign that an attacker is probing or trying to exploit vulnerabilities in your server
+
+Why
+- Attackers often target the transport layer and the applications running on web servers
+- They try to find weaknesses using a technique called fuzzing — sending lots of random or unexpected inputs to see what breaks or leaks information
+  - Fuzzing is often used in the early stages of an attack to gather information before launching a more serious exploit
+    - Part of recon
+  - WAF can help block fuzzing but not everyone has one and ome internal servers may not be protected by a WAF
+
+Detection
+- Look for high volumes of HTTP/S traffic coming from a single host
+- Check your web server access logs for repeated or unusual requests from the same IP
+
+Directory Fuzzing
+- Attacker tries to find hidden or unlisted pages and folders on your website
+- They send a large number of HTTP requests to guess file names or directories
+
+Detection
+- In Wireshark, filter for http to view web traffic
+- To see only requests, use http.request as the filter
+- A single host repeatedly sends requests for non-existent pages
+  - There will be many 404 responses
+  - These requests happen very quickly, often in rapid bursts
+- Easy to spot due to the large number of 404 errors from the same host in a short period.
+- Can also find this activity in your web server’s access logs
+
+Other Fuzzing Techniques
+- Attackers may also fuzz specific parts of your web pages
+  - Dynamic or static elements (e.g., changing id=123 to other values)
+  - IDOR vulnerabilities — for example, changing return=max to return=min in JSON responses to manipulate data access
+
+Detect
+- Filter traffic by host in your analysis tool to narrow down suspicious activity then “Follow HTTP Stream” to see the full conversation between client and server
+- A host is sending lots of requests very quickly
+  - Requests often look similar but with small changes (like different IDs or parameters)
+- Attacker could spread out the requests over time (Slow Fuzzing)
+- Attacker could also use multiple IP addresses or hosts to distribute the traffic and stay under the radar
+
+Prevention
+- Maintain virtualhost or web access configurations to return the proper response codes to throw off these scanners
+- Establish rules to prohibit these IP addresses from accessing our server through a WAF
+
 #### Walkthrough
 Q1. Inspect the basic_fuzzing.pcapng file, part of this module's resources, and enter the total number of HTTP packets that are related to GET requests against port 80 as your answer.
 - Open Wireshark, and open basic_fuzzing capture file
