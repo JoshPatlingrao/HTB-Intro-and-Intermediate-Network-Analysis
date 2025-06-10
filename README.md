@@ -369,6 +369,19 @@ Q1. Inspect the ICMP_smurf.pcapng file, part of this module's resources, and ent
 
 ### 2.7 IP Time-to-Live Attack
 #### Notes
+- TTL attacks are used to avoid being caught by security systems like firewalls or IDS
+
+How?
+- Attacker creates an IP packet with a very low TTL value like 1, 2, or 3
+- Each time the packet passes through a router or host, the TTL value decreases by one
+- When the TTL reaches zero, the packet is discarded and doesn't reach the security system
+- Routers send "Time Exceeded" messages back to the source IP when the packet expires, helping the attacker avoid detection
+
+Detect
+- Attackers often change the TTL value in packets during port scanning, which can be hard to detect in small amounts but noticeable
+- There might be a [SYN, ACK] message from a legitimate service port to a targeted device, indicating an attacker may have bypassed a firewall rule.
+- Check the IPv4 tab in Wireshark, there might be packets with an unusually low TTL value, which is a sign of an attack
+- To stop these attacks, set up a rule to filter out or discard packets with a TTL value that’s too low, preventing manipulated packets from getting through
 
 ### 2.8 TCP Handshake Abnormalities
 #### Notes
