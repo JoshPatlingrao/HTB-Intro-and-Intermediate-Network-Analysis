@@ -491,6 +491,44 @@ Q1. Inspect the TCP-hijacking.pcap file, part of this module's resources, and en
 
 ### 2.10 ICMP Tunneling
 #### Notes
+- Tunneling is a method attackers use to sneak data out of a network or communicate secretly with a compromised system.
+
+How
+- Attacker wraps their malicious traffic inside a legitimate protocol to avoid detection
+  - Tunneling Methods: SSH, HTTP/s, DNS, Proxy-based, ICMP
+- This allows them to bypass firewalls, filters, or other network controls.
+
+Detection
+- Tunneling often comes with signs of the attacker having C2 access over one of your machines
+- You might see unexpected traffic using allowed protocols going to suspicious destinations
+
+Why?
+- Tunneling lets attackers expand control over the network and exfiltrate data, all while hiding behind traffic that looks normal
+
+ICMP Tunneling
+- Attacker hides data inside ICMP packets
+
+How
+- The attacker puts sensitive information (e.g., files, usernames, passwords) into the data field of ICMP packets
+- These packets are sent to another host, hiding the data in plain sight.
+
+Detection
+- Filter for ICMP traffic
+- Check the size of the data in ICMP requests and replies
+  - Normal ICMP packets usually carry around 48 bytes of data
+    - Attacker could use fragmentation to mimic this size
+  - Suspicious ICMP packets might carry very large payloads, like 38,000 bytes
+    - Will contain data the attacker wants to exfiltrate - usernames, passwords, or other readable data
+    - Could also contain encoded or encrypted data instead of plain text to hide it further
+      - May use encryption such as Base64
+      - Can also be decoded with Base64 in Linux terminals to inspect the data
+- Large packet sizes or fragmentation in ICMP traffic is a red flag.
+- Anything larger than 48 bytes is suspicious, and should be investigated
+
+Prevention
+- Block ICMP Requests: if ICMP is not allowed, attackers will not be able to utilize it
+- Inspect ICMP Requests and Replies for Data - stripping data, or inspecting data for malicious content on these requests and replies can allow us better insight into our environment, and the ability to prevent this data exfiltration
+
 #### Walkthrough
 Q1. Enter the decoded value of the base64-encoded string that was mentioned in this section as your answer.
 - Command is found in lesson, but otherwise, open Wireshark, and open ICMP-tunneling capture file
