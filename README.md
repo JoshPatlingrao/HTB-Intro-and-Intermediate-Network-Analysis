@@ -385,6 +385,56 @@ Detect
 
 ### 2.8 TCP Handshake Abnormalities
 #### Notes
+- Normal TCP connections use a 3-way handshake to establish communication between devices
+  - Client sends SYN, server replies with a SYN,ACK and then client confirms with an ACK
+- Pay attention to TCP flags, the markers in the data packets, to spot unusual activity
+
+Flags
+- Urgent (URG): indicates urgency with the current data in stream
+- Acknowledge (ACK): acknowledges receipt of data
+- Push (PSH): tells TCP stack to immediately deliver the received data to the application layer, and bypass buffering
+- Reset (RST): used to terminate the TCP connection
+- Synchronize (SYN): used to establish an initial connection with TCP.
+- Finish (FIN): used to tell the end of a TCP connection. It is used when no more data needs to be sent
+- Explicit Congestion Notification (ECN): used to indicate congestion within our network, it lets the hosts know to avoid unnecessary re-transmissions
+
+Detect
+- A high number of certain flags might indicate someone is scanning the network
+- Unknown or uncommon flags could suggest attacks like TCP RST attacks, hijacking, or attempts to bypass network controls during scanning
+- If a single host is trying to connect to many ports or multiple devices, it could be scanning'
+  - Might include decoy scans (fake connections to confuse detection) or random source attacks (using fake source addresses)
+ 
+SYN Flags
+- Lots of SYN packets in network traffic suggest an nmap scan
+- If port is open, the target machine replies with a SYN-ACK packet to continue the connection, but the attacker sends an RST packet to stop it
+- If port is closed, the target machine sends an RST packet, which can make it hard to spot the scan.
+- Types
+  - SYN Scan: The attacker sends SYN packets and ends the connection early with an RST packet
+  - SYN Stealth Scan: The attacker partially completes the connection to avoid being detected
+ 
+Null Flags
+- Attacker sends TCP packets with no flags to check ports
+- If port is open, the target system doesn’t respond because the packet has no flags
+- If port is closed, the target system sends an RST packet back.
+- Flag looks like [<None>]
+- How the target machine responds will indicate if port is open or closed
+
+ACK Flags
+- High volume of ACK packets being exchanged between two computers, indicator of ACK scan
+- A technique used to check the status of ports on a machine without making a full connection
+- If port is open, the target system might not respond, or might send back an RST packet.
+- If port is closed, the target system sends back an RST packet.
+
+FIN Flags
+- If port is open, the target system doesn’t respond
+- If port is closed, the target system sends an RST packet back
+
+Multiple Flags
+- If multiple flags are used than it's an Xmas Tree scan
+- If port is open, the target system might not respond, or might send back an RST packet
+- If port is closed, the target system sends back an RST packet
+- Easy to detect, all flags are on
+
 #### Walkthrough
 Q1. Inspect the nmap_syn_scan.pcapng file, part of this module's resources, and enter the total count of packets that have the TCP ACK flag set as your answer.
 - Open Wireshark, and open nmap_syn_scan capture file
