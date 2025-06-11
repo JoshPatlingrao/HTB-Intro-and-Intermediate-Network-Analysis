@@ -603,6 +603,49 @@ Q1. Inspect the basic_fuzzing.pcapng file, part of this module's resources, and 
 
 ### 2.12 Strange HTTP Headers
 #### Notes
+Detection
+- Weird "Host" headers (e.g., Host: )
+- Unusual HTTP verbs (like using uncommon methods instead of just GET or POST)
+- Changed or odd User-Agent strings (which tell us what browser or tool is being used)
+
+Finding Strange Host Headers
+- Filter only HTTP requests and replies to narrow down the traffic
+- Exclude requests that use your real server's IP or domain. This helps identify suspicious or unusual Host headers
+  - Look for fake or suspicious hosts like
+    - 127.0.0.1 (the local loopback address)
+    - Admin
+    - Other unauthorized names
+   
+Why
+- To trick the server by using different Host headers
+- To gain unauthorized access to protected parts of the site
+- Often uses tools like Burp Suite to modify these headers
+
+Defense
+- Make sure virtual hosts and access controls are properly configured
+- Keep web server software up to date to avoid known vulnerabilities
+
+Code 400s & Request Smuggling
+- 400 (Bad Request) Errors
+  - Can be clues that someone is trying to send malicious requests
+  - If HTTP stream of a 400 error is followed there might be strange request formatting from the client
+    - Sign of:
+      - HTTP Request Smuggling
+      - CRLF Injection (Carriage Return Line Feed)
+     
+How
+- Craft one request that looks normal, but sneak in a second hidden request
+- If the server is misconfigured, it might process both requests, giving attackers access they shouldn't have
+  - Server’s configuration doesn't properly separate or validate incoming requests.
+- Review and harden server configuration to avoid these vulnerabilities.
+
+Apache Configuration
+- Watching for code 400s can give clear indication to adversarial actions during our traffic analysis efforts
+- Code 200 (success) response indicates attacker succeeded with attack
+
+Extra Notes
+- CVE-2023-25690
+
 #### Walkthrough
 Q1. Inspect the CRLF_and_host_header_manipulation.pcapng file, part of this module's resources, and enter the total number of HTTP packets with response code 400 as your answer.
 - Open Wireshark, and open CRLF_and_host_header_manipulation capture file
