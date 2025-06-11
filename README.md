@@ -763,6 +763,23 @@ Q1. Inspect the SSL_renegotiation_edited.pcapng file, part of this module's reso
 
 ### 2.15 Peculiar DNS Traffic
 #### Notes
+- DNS traffic can be overwhelming, since clients often send many DNS requests.
+- It's important to understand DNS to spot malicious behavior hidden in all that traffic.
+
+DNS Query Types
+- Forward Lookup (most common)
+  - The client asks: “Where is academy.hackthebox.com?”
+  - The DNS server replies: “It’s at 192.168.10.6.”
+- Reverse Lookup:
+  - The client asks: “What is your name, 192.168.10.6?”
+  - The DNS server replies: “It’s academy.hackthebox.com.”
+
+Reverse DNS Lookup
+- Query Initiation: client sends a reverse query to a DNS server with an IP address.
+- Reverse Lookup Zone Check: DNS server checks if it manages the reverse lookup zone for that IP (e.g., 1.2.0.192.in-addr.arpa for IP 192.0.2.1).
+- PTR Record Query: DNS server looks for a PTR (Pointer) record tied to the IP.
+- Response: If found, DNS server returns the domain name (FQDN) for that IP.
+
 #### Walkthrough
 Q1. Enter the decoded value of the triple base64-encoded string that was mentioned in this section as your answer. Answer format: HTB{___}
 - Command is found in lesson, but otherwise, open Wireshark, and open DNS-tunneling capture file
@@ -775,8 +792,97 @@ Q1. Enter the decoded value of the triple base64-encoded string that was mention
   - Attackers can and will double or triple encode, maybe even more.
 - Answer is: HTB{Would_you_forward_me_this_pretty_please}
 
+Common DNS Record Types
+- A: Maps a domain to an IPv4 address
+- AAAA:	Maps a domain to an IPv6 address
+- CNAME:	Creates an alias (e.g., hello.com = world.com)
+- MX:	Points to the mail server for a domain
+- NS:	Identifies the authoritative name server for a domain
+- PTR:	Used in reverse lookups, maps IP to domain
+- TXT:	Holds text data related to a domain (e.g., SPF records)
+- SOA:	Holds admin info about the DNS zone
+
+Why
+- Malicious actors may hide activity in DNS traffic
+- Knowing how DNS works helps you spot abnormal patterns
+  - Unusual PTR lookups
+  - Sudden bursts of CNAME or TXT queries
+  - Unexpected traffic to odd domain names
+
+DNS Tunneling (Malicious Technique)
+- What it is: A method attackers use to bypass firewalls or exfiltrate data by hiding it inside DNS requests and responses.
+- How it works:
+  - Data (like stolen files or commands) is encoded and sent through DNS queries to a server the attacker controls.
+  - It turns DNS traffic into a covert communication channel.
+- Purpose: Stealthy communication or data theft.
+  - Data Exfiltration: used to sneak stolen data out of a network without triggering security alerts.
+  - Command and Control (C2): malware can use DNS tunneling to communicate with its C2 servers, often seen in botnets.
+  - Bypassing Firewalls/Proxies: since DNS is usually allowed through networks, tunneling bypasses security controls that only inspect HTTP/HTTPS.
+  - Domain Generation Algorithms (DGAs): some malware uses random or rapidly changing domains to communicate.
+    - These domains are generated on the fly, making it harder to detect and block them.
+- Red flag: High volume of unusual DNS queries, often to strange or repetitive domain names.
+
+DNS Enumeration (Recon Technique)
+- What it is: A method used by attackers (or penetration testers) to gather information about a target’s DNS infrastructure.
+- How it works:
+  - Queries DNS records (like A, MX, NS, TXT, etc.) to learn about servers, services, subdomains, and email setup.
+  - May use tools like nslookup, dig, or automated scanners.
+- Purpose: Information gathering for future attacks.
+- Red flag: Multiple targeted DNS lookups from a single source, especially for subdomains.
+
+Interplanetary File System and DNS Tunneling
+- A peer-to-peer (P2P) file sharing protocol designed for decentralized storage and sharing of data.
+
+Why
+- Malware Hosting
+  - Attackers store malicious files on IPFS, which are then downloaded via URLs like https://cloudflare-ipfs.com/ipfs/<hash>
+- Difficult to Detect
+  - IPFS is decentralized, meaning content can be hosted on many nodes.
+  - Files aren’t easily removed, and content can be fetched from multiple sources.
+  - It doesn't rely on a single server, making it harder to block or trace.
+
+Detection
+- Monitor for suspicious DNS or HTTP/HTTPS traffic to IPFS gateways, such as:
+  - cloudflare-ipfs.com
+  - Any URL containing /ipfs/<hash>
+- Pay attention to unknown or rarely used URI patterns in network logs.
+
 ### 2.16 Strange Telnet & UDP Connections
 #### Notes
+Telnet
+- Telnet is a network protocol for interactive, text-based communication between devices.
+- Created in the 1970s (RFC 854), but now largely replaced by SSH due to better security.
+- Still used in legacy systems (e.g., Windows NT machines) for remote access.
+- Attackers may use it for:
+  - Data exfiltration
+  - Command and control
+  - Tunneling traffic
+ 
+Detect
+- Port 23 = Traditional Telnet
+  - Common Telnet traffic will appear on TCP port 23 in tools like Wireshark.
+  - It's usually unencrypted, making it easy to inspect — unless attackers encrypt or encode it.
+- Telnet on Unusual Ports
+  - Attackers can run Telnet on non-standard ports (e.g., port 9999).
+  - Look for lots of traffic on uncommon ports and inspect the TCP stream for suspicious behavior.
+- IPv6 Telnet Connections
+  - If your network doesn’t use IPv6, IPv6 traffic could be suspicious.
+  - Use Wireshark filters like: ((ipv6.src_host == fe80::xxxx) or (ipv6.dst_host == fe80::xxxx)) and telnet
+  - Follow TCP streams to analyze the content.
+
+Why UDP
+- Connectionless (no handshake like TCP).
+- Faster, but less reliable (no guaranteed delivery).
+- Often used by attackers for data exfiltration because it's lightweight and less monitored.
+- It just sends data immediately.
+
+Common Use of UDP
+- Real-time Apps: video streaming, online games, VoIP (voice/video calls)
+- Domain Name System (DNS): domain name lookups use UDP for fast queries
+- Dynamic Host Configuration Protocol (DHCP): Assigns IP addresses to devices on the network
+- Simple Network Management Protocol (SNMP): Used for monitoring and managing network devices
+- Trivial File Transfer Protocol (TFTP): Lightweight file transfer protocol (used by some legacy systems)
+
 #### Walkthrough
 Q1. Inspect the telnet_tunneling_ipv6.pcapng file, part of this module's resources, and enter the hidden flag as your answer. Answer format: HTB(___) (Replace all spaces with underscores)
 - Open Wireshark, and open respective capture file
