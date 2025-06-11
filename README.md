@@ -658,6 +658,28 @@ Q1. Inspect the CRLF_and_host_header_manipulation.pcapng file, part of this modu
 
 ### 2.13 Cross-Site Scripting (XSS) & Code Injection Detection
 #### Notes
+- While checking HTTP requests, you might see many requests going to an unknown internal “server.”
+  - A sign of XSS
+  - A lot of data might be sent, like cookies or session tokens
+    - Sometimes it's encoded or encrypted
+   
+How
+- Attacker injects malicious JavaScript into a web page (often through user input)
+- When other users visit the page, their browser runs the attacker’s script
+- This can let the attacker steal cookies, tokens, or session data
+  - You may see it sending data to an external or internal address controlled by the attacker
+- May also inject malicious PHP code to try to gain command and control of your server
+
+Defense
+- Quickly remove the malicious comment or input
+- In serious cases, even take the server offline temporarily to fix the issue
+
+Prevention
+- Always sanitize and validate user input
+- Do not interpret user input as code
+- Use Content Security Policy (CSP) and escape output where needed
+- Keep server-side code and plugins secure and up to date
+
 #### Walkthrough
 Q1. Inspect the first packet of the XSS_Simple.pcapng file, part of this module's resources, and enter the cookie value that was exfiltrated as your answer.
 - Open Wireshark, and open respective capture file
@@ -666,6 +688,69 @@ Q1. Inspect the first packet of the XSS_Simple.pcapng file, part of this module'
 
 ### 2.14 SSL Renegotiation Attacks
 #### Notes
+- HTTP is stateless and unencrypted, but HTTPS adds encryption to secure communication between clients and web servers
+- Uses
+  - TLS (Transport Layer Security)
+  - SSL (Secure Sockets Layer)
+ 
+How HTTPS Works
+- Handshake: the client and server agree on encryption settings and they exchange certificates to verify identity
+- Encryption Setup: after handshake, they start using the agreed encryption method
+- Data Exchange: all web data (pages, images, etc.) is encrypted during transfer
+- Decryption: client and server use public and private keys to decrypt the data.
+
+Common HTTPS Attacks
+- SSL renegotiation attacks: attackers force the session to use weaker encryption standards
+- Other encryption-related threats: for example, the Heartbleed vulnerability, which exploits a flaw in certain SSL/TLS implementations to leak sensitive data
+
+Prevention
+- Use strong encryption settings
+- Keep TLS/SSL libraries and certificates up to date.
+
+TLS and SSL Handshakes
+- To create an encrypted connection, the client and server go through a process called the TLS/SSL handshake. Both are similar
+- Client Hello:
+  - The client starts the process by sending a message to the server
+  - Includes: supported TLS/SSL versions, list of encryption algorithms (cipher suites), random data (called a nonce)
+- Server Hello:
+  - Server replies with its chosen settings: selected TLS/SSL version, chosen cipher suite, another nonce
+- Certificate Exchange:
+  - Server sends its digital certificate to prove its identity
+  - The certificate contains the server's public key
+- Key Exchange:
+  - Client creates a premaster secret
+  - It encrypts this secret using the server’s public key and sends it to the server
+- Session Key Derivation:
+  - Both the client and server use: the premaster secret and the two nonces
+  - They calculate session keys used to encrypt and decrypt data
+- Finished Messages:
+  - Both sides send a finished message to confirm the handshake worked
+  - These messages are encrypted using the session keys and contain a hash of the previous steps
+- Secure Data Exchange:
+  - With the handshake complete, encrypted communication begins
+  - This includes web pages, images, or other data sent securely
+ 
+SSL Renegotiation Attack
+- In Wireshark, use ssl.record.content_type == 22 to show only TLS/SSL handshake traffic
+
+Detection
+- Multiple Client Hellos:
+  - You may see several "Client Hello" messages from the same client in a short time
+  - A strong sign the attacker is forcing renegotiation
+  - Goal: Downgrade the encryption to a weaker cipher
+    - If a stronger cipher is used in one of the connections, it leaves only weaker ciphers available
+- Out-of-Order Handshake Messages:
+  - Normally caused by network issues, but in this context a Client Hello appears after the handshake is already complete
+  - Can indicate a renegotiation attempt
+ 
+Why
+- DoS:
+  - Repeated renegotiation uses up server resources, possibly making it crash or become unresponsive.
+- Weak Cipher Exploitation:
+  - The attacker may try to renegotiate using a weaker encryption algorithm that is easier to break.
+- Cryptanalysis:
+  - Renegotiation could be part of a larger plan to analyze encryption patterns and discover weaknesses.
+
 #### Walkthrough
 Q1. Inspect the SSL_renegotiation_edited.pcapng file, part of this module's resources, and enter the total count of "Client Hello" requests as your answer.
 - Open Wireshark, and open respective capture file
